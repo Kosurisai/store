@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Store Management</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="blur-background" class="overlay"></div>
+    <div class="container">
+        <header>
+            <h1>Admin Dashboard</h1>
+        </header>
+        <nav>
+            <ul>
+                <li><a href="#" id="user-management-link">User Management</a></li>
+                <li><a href="#" id="store-overview-link">Store Overview</a></li>
+                <li><a href="#" id="audit-trail-link">Audit Trail</a></li>
+                <li><a href="#" id="requests-link">Requests</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <!-- User Management Section -->
+            <section id="user-management-section" class="active">
+                <h2>User Management</h2>
+                <button onclick="showuserForm()">AddUser</button>
+                <div class="form-container" id="addUserForm" style="display: none;">
+                    <form id="user-form">
+                        <input type="hidden" id="user-id">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" required>
+
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" required>
+
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" required>
+
+                        <label for="role">Role:</label>
+                        <select id="role">
+                            <option value="user">User</option>
+                        </select>
+                        <span id="User-button">
+                        <button type="submit" id="user-submit-button" onclick="addUser()">Add User</button>
+                        <button onclick="cancelUser()">cancel</button>
+                        </span>
+                    </form>
+                    
+                    
+                </div>
+                <div class="table-container">
+                    <table id="user-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Password</th>
+                                <th>Role</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- User data will be dynamically loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Store Overview Section -->
+            <section id="store-overview-section">
+                <h2>Store Overview</h2>
+                <div class="overview-container">
+                    <div class="overview-card">
+                        <h3>Total Stores</h3>
+                        <p id="total-stores">0</p>
+                    </div>
+                    <div class="overview-card">
+                        <h3>Approved Requests</h3>
+                        <p id="active-stores">0</p>
+                    </div>
+                    <div class="overview-card">
+                        <h3>Pending Requests</h3>
+                        <p id="pending-requests">0</p>
+                    </div>
+                </div>
+                <button id="store-inventory-button" onclick="showStoreInventory()">Show Store Inventory</button>
+                <div id="btn-container" style="display: none;">
+                    <button id="addstorebtn" onclick="showForm()">ADD Store</button>
+                </div>
+        
+                <form id="AddStoreForm" style="display: none;">
+                    <h3>Enter the Details Of The Store</h3>
+                    <label for="name">Store Name:</label>
+                    <input type="text" id="name" name="name" required>
+        
+                    <label for="location">Location:</label>
+                    <input type="text" id="location" name="location" required>
+        
+                    <label for="contact_number">Contact Number:</label>
+                    <input type="tel" id="contact_number" name="contact_number" required>
+        
+                    <label for="opening_hours">Opening Hours:</label>
+                    <input type="text" id="opening_hours" name="opening_hours" placeholder="e.g., Mon-Fri 9am-5pm" required>
+        
+                    <label for="available_networks">Available Networks:</label>
+                    <input type="text" id="available_networks" name="available_networks[]" required>
+        
+                    <label for="website">Website:</label>
+                    <input type="url" id="website" name="website" placeholder="https://example.com">
+        
+                    <button type="submit" onclick="AddStore(event)">Save</button>
+                    <button type="button" onclick="cancel()">Cancel</button>
+                </form>
+        
+                <form id="UpdateForm" style="display: none;">
+                    <h3>Update the Details Of The Store</h3>
+                   
+                    <label for="name">Store Name:</label>
+                    <input type="text" id="names" name="name" required>
+        
+                    <label for="location">Location:</label>
+                    <input type="text" id="locations" name="location" required>
+        
+                    <label for="contact_number">Contact Number:</label>
+                    <input type="tel" id="contact_numbers" name="contact_number" required>
+        
+                    <label for="opening_hours">Opening Hours:</label>
+                    <input type="text" id="opening_hourss" name="opening_hours" placeholder="e.g., Mon-Fri 9am-5pm" required>
+        
+                    <label for="available_networks">Available Networks:</label>
+                    <input type="text" id="available_networkss" name="available_networks[]" required>
+        
+                    <label for="website">Website:</label>
+                    <input type="url" id="websites" name="websites" placeholder="https://example.com">
+        
+                    <span id="updateDatabtn"></span>
+                    <button type="button" onclick="cancel()">Cancel</button>
+                </form>
+                <div id="store-data">
+                    <div class="store-card" id="store-card">
+                    </div>
+                    </div>
+
+                    <div id="popup">
+                        <span id="popup-message">Popup Message</span><br><br>
+                        <button id="popup-close" onclick="closePopup()">Close</button>
+                    </div>
+            
+                    <div id="deletestore">
+                        <span id="delete-message">Delete this store?</span><br><br>
+                        <span id="confirmdelete"></span>
+                        <button id="delete-close" onclick="closePopup()">Cancel</button>
+                    </div>
+            </section>
+            <section id="audit-trail-section">
+                <h2>Audit Trail</h2>
+                <div class="table-container">
+                    <table id="audit-trail-table">
+                        <thead>
+                            <tr>
+                                <th>Admin/User</th>
+                                <th>Store</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <section id="requests-section">
+                <h2>User Requests</h2>
+                <div class="table-container">
+                    <table id="requests-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Request Details</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestbody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

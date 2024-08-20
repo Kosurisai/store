@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .button-container button {
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button-container button:nth-child(1) {
+            background-color: #3498db;
+        }
+
+        .button-container button:nth-child(2) {
+            background-color: #e67e22;
+        }
+
+        .button-container button:nth-child(3) {
+            background-color: #2ecc71;
+        }
+
+        .button-container button:hover {
+            opacity: 0.9;
+        }
+
+        .section {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .section h2 {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .section p {
+            color: #555;
+        }
+
+        .active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Store Manager</h1>
+        <div class="button-container">
+            <button onclick="showSection('requestAdmin')">Request to Admin</button>
+            <button onclick="showSection('requestsSent')">Requests Sent</button>
+            <button onclick="showSection('personalShelf')">Personal Shelf</button>
+        </div>
+
+        <div id="requestAdmin" class="section">
+            <h2>Request to Admin</h2>
+        </div>
+
+        <div id="requestsSent" class="section">
+            <h2>Requests Sent</h2>
+        </div>
+
+        <div id="personalShelf" class="section">
+            <h2>Personal Shelf</h2>
+        </div>
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            if(sectionId === 'requestAdmin')
+            {
+                window.location.href = 'requesttoadmin.html';
+            }
+            else if(sectionId === 'requestsSent')
+            {
+                window.location.href = 'requestssent.html';
+            }
+            else
+            {
+                window.location.href = 'personalshelf.html';
+            }
+            document.getElementById(sectionId).classList.add('active');
+        }
+    </script>
+</body>
+</html>

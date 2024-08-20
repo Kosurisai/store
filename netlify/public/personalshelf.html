@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Personal Storeshelf</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-top: 80px;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #34495e;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        header nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 20px;
+            font-size: 1.2rem;
+            padding: 10px 20px;
+            transition: background-color 0.3s ease;
+            border-radius: 5px;
+        }
+
+        header nav a:hover {
+            background-color: #2c3e50;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #34495e;
+            margin-bottom: 20px;
+        }
+
+        #StoresData {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #favorite-stores,#Approved-request {
+            background-color: #dff9fb;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .store-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .store-card h3 {
+            margin-top: 0;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .store-card p {
+            margin: 10px 0;
+            color: #555;
+            font-size: 16px;
+        }
+
+        .store-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .store-actions {
+            text-align: right;
+        }
+
+        .store-actions button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .store-actions button:hover {
+            background-color: #0056b3;
+        }
+
+        .store-actions button.delete {
+            background-color: #dc3545;
+        }
+
+        .store-actions button.delete:hover {
+            background-color: #c82333;
+        }
+
+        #popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            display: none;
+        }
+
+        #popup-message {
+            font-size: 18px;
+            color: #333;
+        }
+
+        #popup-close {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #popup-close:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stores = document.getElementById('stores');
+            const FavoriteStores = document.getElementById('Favorite-stores');
+            const Approvedrequests = document.getElementById('Approved-requests');
+
+            const StoresData = document.getElementById('StoresData');
+            const favorite = document.getElementById('favorite-stores');
+            const approved = document.getElementById('Approved-request');
+
+            window.onload = function () {
+                StoresData.style.display = 'block';
+                favorite.style.display = 'none';
+                approved.style.display= 'none';
+                fetch('stores').then(
+                    response => response.json()
+                ).then(data => loaddata(data));
+            }
+
+            stores.addEventListener('click', function() {
+                StoresData.style.display = 'block';
+                favorite.style.display = 'none';
+                approved.style.display= 'none';
+                fetch('stores').then(
+                    response => response.json()
+                ).then(data => loaddata(data));
+            });
+
+            FavoriteStores.addEventListener('click', function() {
+                StoresData.style.display = 'none';
+                favorite.style.display = 'block';
+                approved.style.display= 'none';
+                fetch(`/favoritestore/${localStorage.getItem('userid')}`).then(response => response.json()).then(data => {
+                   loadFavoriteStores(data);
+                });
+            });
+
+            Approvedrequests.addEventListener('click', function() {
+                StoresData.style.display = 'none';
+                favorite.style.display = 'none';
+                approved.style.display= 'block';
+                fetch(`/approvedrequests/${localStorage.getItem('userid')}`).then(response => response.json()).then(stores => {
+                    const data = stores.filter((store, index, self) =>
+                    index === self.findIndex((s) => (
+                        s.id === store.id
+                    ))
+                );
+                    let cards = document.getElementById('store-adata');
+                    cards.innerHTML = '';
+                    for (i = 0; i < data.length; i++) {
+                        let div = document.createElement('div');
+                        div.innerHTML = `<div class="store-card" id="store-card">
+                            <h3>${data[i].name}</h3>
+                            <p><strong>Location:</strong>${data[i].location}</p>
+                            <p><strong>Contact Number:</strong>${data[i].contact_number}</p>
+                            <p><strong>Opening Hours:</strong>${data[i].opening_hours}</p>
+                            <p><strong>Available Networks:</strong>${data[i].available_networks}</p>
+                            <p><strong>Website:</strong> <a href="https://example.com" target="_blank">${data[i].website}</a></p>`
+                        cards.append(div);
+                    }
+                })
+            })
+
+            function loadFavoriteStores(data) {
+                let cards = document.getElementById('store-fdata');
+                    cards.innerHTML = '';
+                    for (i = 0; i < data.length; i++) {
+                        console.log(data);
+                        let div = document.createElement('div');
+                        div.innerHTML = `<div class="store-card" id="store-card">
+                            <h3>${data[i].name}</h3>
+                            <p><strong>Location:</strong>${data[i].location}</p>
+                            <p><strong>Contact Number:</strong>${data[i].contact_number}</p>
+                            <p><strong>Opening Hours:</strong>${data[i].opening_hours}</p>
+                            <p><strong>Available Networks:</strong>${data[i].available_networks}</p>
+                            <p><strong>Website:</strong> <a href="https://example.com" target="_blank">${data[i].website}</a></p>
+                            <div class="store-actions">
+                                <button class="delete" onclick="RemoveFavorite(${data[i].id})">Remove Favorite</button>
+                            </div>`
+                        cards.append(div);
+                    }
+            }
+
+            function loaddata(users) {
+                let Container = document.getElementById('store-data');
+                console.log(Container);
+                Container.innerHTML = '';
+                for (i = 0; i < users.length; i++) {
+                    console.log(users[i].id);
+                    let name = users[i].name;
+                    let location = users[i].location;
+                    let phone = users[i].contact_number;
+                    let network = users[i].available_networks;
+                    let open = users[i].opening_hours;
+                    let web = users[i].website;
+                    let row = document.createElement('div');
+                    row.innerHTML = ` <div class="store-card" id="store-card">
+                        <h3>${name}</h3>
+                        <p><strong>Location:</strong>${location}</p>
+                        <p><strong>Contact Number:</strong>${phone}</p>
+                        <p><strong>Opening Hours:</strong>${open}</p>
+                        <p><strong>Available Networks:</strong>${network}</p>
+                        <p><strong>Website:</strong> <a href="https://example.com" target="_blank">${web}</a></p>
+                        <div class="store-actions">
+                            <button onclick="AddFavorite(${users[i].id})">Add Favorite</button>
+                        </div>`;
+                    Container.append(row);
+                }
+            }
+        });
+            function AddFavorite(store_id) {
+                const user_id = localStorage.getItem('userid');
+                fetch('/favoritestore', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ store_id, user_id })
+                }).then(response => response.json()).then(data => {
+                    if (data) {
+                        console.log(data);
+                    }
+                });
+                showPopup("added as favorite store");
+            }
+
+            function RemoveFavorite(store_id) {
+                const user_id = localStorage.getItem('userid');
+                fetch(`/favoritestore/${store_id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ store_id, user_id })
+                }).then(response => response.json()).then(data => {
+                    if (data) {
+                        console.log(data);
+                    }
+                });
+                fetch(`/favoritestore/${localStorage.getItem('userid')}`).then(response => response.json()).then(data => {
+                   loadFavoriteStores(data);
+                });
+                showPopup('store removed from favorites');
+            }
+            function loadFavoriteStores(data) {
+                let cards = document.getElementById('store-fdata');
+                    cards.innerHTML = '';
+                    for (i = 0; i < data.length; i++) {
+                        console.log(data);
+                        let div = document.createElement('div');
+                        div.innerHTML = `<div class="store-card" id="store-card">
+                            <h3>${data[i].name}</h3>
+                            <p><strong>Location:</strong>${data[i].location}</p>
+                            <p><strong>Contact Number:</strong>${data[i].contact_number}</p>
+                            <p><strong>Opening Hours:</strong>${data[i].opening_hours}</p>
+                            <p><strong>Available Networks:</strong>${data[i].available_networks}</p>
+                            <p><strong>Website:</strong> <a href="https://example.com" target="_blank">${data[i].website}</a></p>
+                            <div class="store-actions">
+                                <button class="delete" onclick="RemoveFavorite(${data[i].id})">Remove Favorite</button>
+                            </div>`
+                        cards.append(div);
+                    }
+            }
+        function showPopup(message) {
+            document.getElementById('popup-message').textContent = message;
+            document.getElementById('popup').style.display = 'block';
+        }
+
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+        }
+
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="#" id="stores">Stores</a>
+            <a href="#" id="Favorite-stores">Favorite Stores</a>
+            <a href="#" id="Approved-requests">Approved Requests</a>
+        </nav>
+    </header>
+    <div class="container" id="StoresData" style="display: none;">
+        <h1>Stores Data</h1>
+        <div id="store-data"></div>
+    </div>
+    <div class="container" id="favorite-stores" style="display: none;">
+        <h1>Favorite Stores</h1>
+        <div id="store-fdata"></div>
+    </div>
+    <div class="container" id="Approved-request" style="display: none;">
+        <h1>Approved Stores</h1>
+        <div id="store-adata"></div>
+    </div>
+    <div id="popup">
+        <p id="popup-message">Store added to favorites!</p>
+        <button id="popup-close" onclick="closePopup()">Close</button>
+    </div>
+
+</body>
+</html>

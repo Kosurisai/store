@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stores Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: bold;
+            font-size: 40px;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        #addstorebtn {
+            padding: 15px 20px;
+            font-size: large;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #addstorebtn:hover {
+            background-color: #218838;
+        }
+
+        form {
+            display: none;
+            border: solid #ccc 1px;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input,
+        textarea,
+        select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .store-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .store-card h3 {
+            margin-top: 0;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .store-card p {
+            margin: 10px 0;
+            color: #555;
+            font-size: 16px;
+        }
+
+        .store-actions {
+            text-align: right;
+        }
+
+        .store-actions button {
+            margin-left: 10px;
+            background-color: #28a745;
+        }
+
+        .store-actions button.delete {
+            background-color: #dc3545;
+        }
+
+        #popup,
+        #deletestore {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            width: 300px;
+            text-align: center;
+        }
+
+        #popup-message,
+        #delete-message {
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        #popup-close,
+        #delete-close {
+            background-color: gray;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 1rem;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        #popup-close:hover,
+        #delete-close:hover {
+            background-color: red;
+        }
+
+        #blur-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 999;
+            display: none;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded',function(){
+            fetch('/stores').then(
+                response => response.json()
+            ).then(users => loaddata(users));
+            showPopup('You can send a new request to the admin from here.');
+        })
+        function loaddata(users)
+        {
+            let Container = document.getElementById('store-data');
+            console.log(Container);
+            Container.innerHTML = ''; 
+        for(i=0;i<users.length;i++)
+        {
+                console.log(users[i].id);
+                let name = users[i].name;
+                let location = users[i].location;
+                let phone = users[i].contact_number;
+                let network = users[i].available_networks;
+                let open =users[i].opening_hours;
+                let web = users[i].website;
+                let row = document.createElement('div');
+                    row.innerHTML = ` <div class="store-card" id="store-card">
+                    <h3>${name}</h3>
+                    <p><strong>Location:</strong>${location}</p>
+                    <p><strong>Contact Number:</strong>${phone}</p>
+                    <p><strong>Opening Hours:</strong>${open}</p>
+                    <p><strong>Available Networks:</strong>${network}</p>
+                    <p><strong>Website:</strong> <a href="https://example.com" target="_blank">${web}</a></p>
+                    <div class="store-actions">
+                        <button onclick="RequestStore(${users[i].id})">Request</button>
+                    </div>`;
+                
+                Container.append(row);
+            }
+        }
+        function RequestStore(store_id){
+            const user_id = localStorage.getItem('userid');
+            fetch('/userrequest',{
+                method : 'POST',
+                headers : {
+                    'Content-Type' : 'application/json'
+                },
+                body: JSON.stringify({store_id,user_id})
+            }).then(response => response.json()).then(data => {
+                if(data){
+                    console.log(data);
+                }
+            })
+            showPopup('Request sent to Admin');
+        }
+        function showPopup(message) {
+            document.getElementById('popup-message').textContent = message;
+            document.getElementById('blur-background').style.display = 'block';
+            document.getElementById('popup').style.display = 'block';
+        }
+
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+            document.getElementById('deletestore').style.display = 'none';
+            document.getElementById('blur-background').style.display = 'none';
+        }
+    </script>
+</head>
+<body>
+<div id="blur-background"></div>
+<div class="container">
+    <h1>Request Stores</h1>
+    <div id="store-data">
+        <div class="store-card" id="store-card">
+            <h3>Store Name</h3>
+            <p><strong>Location:</strong> Example Location</p>
+            <p><strong>Contact Number:</strong> (123) 456-7890</p>
+            <p><strong>Opening Hours:</strong> Mon-Fri 9am-5pm</p>
+            <p><strong>Available Networks:</strong> Network 1, Network 2</p>
+            <p><strong>Website:</strong> <a href="https://example.com" target="_blank">example.com</a></p>
+            <div class="store-actions">
+            </div>
+        </div>
+    </div>
+    <div id="popup">
+        <span id="popup-message">Popup Message</span><br><br>
+        <button id="popup-close" onclick="closePopup()">Close</button>
+    </div>
+
+    <div id="deletestore">
+        <span id="delete-message">Delete this store?</span><br><br>
+        <span id="confirmdelete"></span>
+        <button id="delete-close" onclick="closePopup()">Cancel</button>
+    </div>
+</div>
+</body>
+
+</html>
